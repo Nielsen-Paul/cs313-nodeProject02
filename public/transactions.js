@@ -10,10 +10,16 @@ function add() {
         for (var i = 0; i < data.company.length; i++) {
             var company = data.company[i];
             $("body").append(company);
-            //var date = data.date[i];
-            //$("body").append(date);
-            //var amount = data.amount[i];
-            //$("body").append(amount);
+        }
+        
+        for (var i = 0; i < data.date.length; i++) {
+            var date = data.date[i];
+            $("body").append(date);
+        }
+
+        for (var i = 0; i < data.amount.length; i++) {
+            var amount = data.amount[i];
+            $("body").append(amount);
         }
     })
 }
