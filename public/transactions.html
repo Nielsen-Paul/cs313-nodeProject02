@@ -15,11 +15,14 @@
         <input id="company" placeholder="company" />
         <input id="amount" placeholder="amount" />
         <br />
-        <button id="add" onclick="add()">Add Transaction</button>
-        <p id="addText">Change text</p>
+        <button id="add" onclick="add()">Add Transaction</button>        
     </form>
-    
-    
+    <script>
+    function add() {
+        document.getElementById("addText").innerHTML = "It worked!";
+    }
+    </script>
+    <p id="addText">Change text</p>
 </body>
 
 </html>
