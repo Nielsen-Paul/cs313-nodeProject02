@@ -5,19 +5,16 @@
 <head>
     <meta charset="utf-8" />
     <script src="./transactions.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <title>Transactions</title>
 </head>
 
-<body>
+<body onload="add()">
     <h1>Add a transaction</h1>
-    <form>
         <input id="date" placeholder="date" />
         <input id="company" placeholder="company" />
         <input id="amount" placeholder="amount" />
-        <br />
-    </form>
-    <button id="add" onclick="add()">Add Transaction</button>     
-    <p id="addText">Change text</p>
+    <br />
 </body>
 
 </html>
