@@ -6,15 +6,33 @@
     <meta charset="utf-8" />
     <script src="./transactions.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="transactions.css">
     <title>Transactions</title>
 </head>
 
 <body onload="add()">
+    <div id="navBar">Personal Checkbook Register</div>
+    <h2>If this is your first time, enter your balance before the transactions</h2>
+    <form>
+        <input id="startingTotal" placeholder="balance" />
+        <input type="submit" id="beginningBalance" />
+    </form>
     <h1>Add a transaction</h1>
+    <form>
         <input id="date" placeholder="date" />
         <input id="company" placeholder="company" />
         <input id="amount" placeholder="amount" />
+        <input type="submit" id="formSubmit" onclick="formSubmit()" />
+    </form>
     <br />
+    <table id="pastTransactions">
+        <tr>
+            <th>Date</th>
+            <th>Company</th>
+            <th>Amount</th>
+            <th>Total</th>
+        </tr>
+    </table>
 </body>
 
 </html>

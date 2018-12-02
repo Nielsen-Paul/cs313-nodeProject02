@@ -1,0 +1,18 @@
+
+#navBar {
+    padding: 40px;
+    font-size: 30px;
+    text-align: center;
+    background-color: blue;
+    color: white;
+}
+
+body {
+    background-color: lightblue;
+    text-align: center;
+}
+
+#pastTransactions {
+    width: 90%;
+    text-align: center;
+}

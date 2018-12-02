@@ -3,14 +3,12 @@ function load() {
     $.get("/signIn", function(data) {
         console.log(data);
 
-        for (var i = 0; i < data.name.length; i++) {
-            var name = data.name[i];
-            $("body").append(name);
-        }
-        
-        for (var i = 0; i < data.password.length; i++) {
-            var password = data.password[i];
-            $("body").append(password);
+        for (var i = 0; i < data.length; i++) {
+            var info = data[i];
+
+            var text = info.name + " " + info.password + "<br>";
+                                
+            $("body").append(text);
         }
     })
 }

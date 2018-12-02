@@ -9,6 +9,8 @@ const connectionString = process.env.DATABASE_URL ||
 
 express()
     .use(express.static(path.join(__dirname, 'public')))
+    .use(express.json())
+    .use(express.urlencoded({extended: true}))
     .set('views', path.join(__dirname, 'views'))
     .set('view engine', 'ejs')
     .get('/', (req, res) => res.render('pages/index'))
@@ -19,10 +21,10 @@ express()
         });
         const { id } = req.query;
         db.connect().then(() => {
-            db.query('SELECT * FROM public.users').then(result => {
+            db.query(`SELECT * FROM public.users`).then(result => {
                 res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify(result.rows[0]));
-                console.log(JSON.stringify(result.rows[0]));
+                res.send(JSON.stringify(result.rows));
+                console.log(JSON.stringify(result.rows));
                 db.end();
             });
         });
@@ -34,12 +36,51 @@ express()
         });
         const { id } = req.query;
         db.connect().then(() => {
-            db.query('SELECT * FROM public.transactions').then(result => {
+            db.query(`SELECT * FROM public.transactions`).then(result => {
                 res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify(result.rows[0]));
-                console.log(JSON.stringify(result.rows[0]));
+                res.send(JSON.stringify(result.rows));
+                console.log(JSON.stringify(result.rows));
                 db.end();
             });
         });
+    })
+    .post('/signIn', (req, res) => {
+        let name = req.body.name;
+        let password = req.body.password;
+
+        const db = new Client({
+            connectionString: connectionString,
+            ssl: true
+        });
+        const { id } = req.query;
+        db.connect().then(() => {
+            const text = 'INSERT INTO users(name, password) VALUES($1, $2)';
+            const values = [name, password];
+            db.query(text, values, (err, res) => {
+                if (err) {
+                    console.log(err.stack)
+                } else {
+                    console.log(res.rows[0]); 
+                }
+            });
+        });        
+    })
+    .post('/transactions', (req, res) => {
+        let company = req.body.company;
+        let date = req.body.date;
+        let amount = areq.body.amount;
+        let total = calulateTotal(total, amount);
+
+        const db = new Client({
+            connectionString: connectionString,
+            ssl: true
+        });
+        const { id } = req.query;
+        db.connect().then(() => {
+            db.query(`INSERT INTO `).then(result => {
+
+                db.end();
+            });
+        });        
     })
     .listen(PORT, () => console.log(`Listening on ${PORT}`));

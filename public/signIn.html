@@ -6,13 +6,20 @@
     <meta charset="utf-8" />
     <script src="./signIn.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="transactions.css">
     <title>Transactions Sign In</title>
 </head>
 
 <body onload="load()">
+    <div id="navBar">Personal Checkbook Register</div>
     <h1>Please sign in</h1>
+    <form action="transactions" method="POST">
         <input id="name" placeholder="name" />
-        <input id="password" placeholder="password" />
+        <br>
+        <input id="password" type="password" placeholder="password" />
+        <br>
+        <input type="submit">
+    </form>    
     <br />
 </body>
 
