@@ -13,7 +13,9 @@
   "dependencies": {
     "ejs": "^2.5.6",
     "express": "^4.15.2",
+    "http": "0.0.0",
     "moment": "^2.22.2",
+    "money-math": "^2.5.1",
     "pg": "^7.6.1"
   },
   "devDependencies": {

@@ -13,16 +13,25 @@
 <body onload="add()">
     <div id="navBar">Personal Checkbook Register</div>
     <h2>If this is your first time, enter your balance before the transactions</h2>
-    <form>
-        <input id="startingTotal" placeholder="balance" />
+    <form action="./beginningBalance" method="POST">
+        <input id="startingTotal" name="startingTotal" placeholder="balance" />
         <input type="submit" id="beginningBalance" />
     </form>
-    <h1>Add a transaction</h1>
-    <form>
-        <input id="date" placeholder="date" />
-        <input id="company" placeholder="company" />
-        <input id="amount" placeholder="amount" />
-        <input type="submit" id="formSubmit" onclick="formSubmit()" />
+    <h1>Add an expense</h1>
+    <h3>Make sure the amount is in this format (ddd.cc)</h3>
+    <form action="./transactions" method="POST">
+        <input id="date" name="date" placeholder="date" />
+        <input id="company" name="company" placeholder="company" />
+        <input id="amount" name="amount" placeholder="amount" />
+        <input type="submit" />
+    </form>
+    <h1>Add your paychecks and other income</h1>
+    <h3>Make sure the amount is in this format (ddd.cc)</h3>
+    <form action="./incomes" method="POST">
+        <input id="date" name="incomeDate" placeholder="date" />
+        <input id="company" name="incomeCompany" placeholder="company" />
+        <input id="amount" name="incomeAmount" placeholder="amount" />
+        <input type="submit" />
     </form>
     <br />
     <table id="pastTransactions">

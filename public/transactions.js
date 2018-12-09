@@ -10,8 +10,8 @@ function add() {
 
             var text = "<tr>" + "<td>" + info.date + "</td>" + 
                                 "<td>" + info.company + "</td>" +
-                                "<td>" + info.amount + "</td>" +
-                                "<td>" + info.total + "</td>" + "</tr>";
+                                "<td>" + "$" + info.amount + "</td>" +
+                                "<td>" + "$" + info.total + "</td>" + "</tr>";
                                 
             $("#pastTransactions").append(text);
         }
