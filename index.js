@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const money = require("money-math");
+const session = require("cookie-session");
 const { Client } = require('pg');
 const PORT = process.env.PORT || 5000;
 
@@ -9,13 +10,20 @@ const connectionString = process.env.DATABASE_URL ||
 
 
 express()
+    .use(session({
+        name: 'session',
+        keys: ['key1'],
+
+        // Cookie Options
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }))
     .use(express.static(path.join(__dirname, 'public')))
     .use(express.json())
     .use(express.urlencoded({ extended: true }))
     .set('views', path.join(__dirname, 'views'))
     .set('view engine', 'ejs')
     .get('/', (req, res) => res.render('pages/index'))
-    .get('/signIn', (req, res) => {
+    .get('/signUp', (req, res) => {
         const db = new Client({
             connectionString: connectionString,
             ssl: true
@@ -30,6 +38,34 @@ express()
             });
         });
     })
+    .post('/signIn', (req, res) => {
+        const db = new Client({
+            connectionString: connectionString,
+            ssl: true
+        });
+        const { id } = req.query;
+        db.connect().then(() => {
+            let name = req.body.name;
+            let password = req.body.password;
+            const query = {
+                text: 'SELECT password, id FROM public.users WHERE name = $1',
+                values: [name]
+            }
+
+            // callback
+            db.query(query, (err, result) => {
+                if (err) {
+                    console.log(err.stack);
+                } else {
+                    console.log(result.rows[0]);
+                    if (password == result.rows[0].password) {
+                        req.session.id = result.rows[0].id;
+                        res.sendFile(path.join(__dirname + '/public/transactions.html'));
+                    }
+                }
+            })
+        });
+    })
     .get('/transactions', (req, res) => {
         const db = new Client({
             connectionString: connectionString,
@@ -37,7 +73,7 @@ express()
         });
         const { id } = req.query;
         db.connect().then(() => {
-            db.query(`SELECT * FROM public.transactions INNER JOIN public.total ON public.transactions.user_id = public.total.total_user_id`).then(result => {
+            db.query(`SELECT * FROM public.transactions WHERE user_id = $1`, [req.session.id]).then(result => {
                 res.setHeader('Content-Type', 'application/json');
                 res.send(JSON.stringify(result.rows));
                 console.log(JSON.stringify(result.rows));
@@ -45,7 +81,7 @@ express()
             });
         });
     })
-    .post('/signIn', (req, res) => {
+    .post('/signUp', (req, res) => {
         const db = new Client({
             connectionString: connectionString,
             ssl: true
@@ -65,9 +101,10 @@ express()
                     console.log(err.stack);
                 } else {
                     console.log(res.rows[0]);
+
                 }
             })
-            res.sendFile(path.join(__dirname + '/public/transactions.html'));
+            res.sendFile(path.join(__dirname + '/public/signIn.html'));
         });
     })
     .post('/beginningBalance', (req, res) => {
@@ -79,8 +116,8 @@ express()
         const { id } = req.query;
         db.connect().then(() => {
             const query = {
-                text: 'INSERT INTO public.total(total, total_user_id) VALUES($1, $2)',
-                values: [amount, 1],
+                text: "INSERT INTO public.transactions(date, company, amount, user_id, total) VALUES(now(), 'Balance', $1, $2, $3)",
+                values: [amount, req.session.id, amount]
             }
 
             // callback
@@ -98,6 +135,7 @@ express()
         let company = req.body.company;
         let date = req.body.date;
         let amount = req.body.amount;
+        var total;
 
         const db = new Client({
             connectionString: connectionString,
@@ -105,21 +143,21 @@ express()
         });
         const { id } = req.query;
         db.connect().then(() => {
-            const query = {
-                text: 'INSERT INTO public.transactions(date, company, amount, user_id) VALUES($1, $2, $3, $4)',
-                values: [date, company, amount, 1],
-            }
 
-            // callback
-            db.query(query, (err, response) => {
-                if (err) {
-                    console.log(err.stack)
-                } else {
-                    console.log(response.rows[0])
+            subtractFromTotal(amount, req, function (total) {
+                const query = {
+                    text: 'INSERT INTO public.transactions(date, company, amount, user_id, total) VALUES($1, $2, $3, $4, $5)',
+                    values: [date, company, amount, req.session.id, total],
                 }
-                subtractFromTotal(amount, res, function () {
 
-                    res.sendFile(path.join(__dirname + '/public/transactions.html'));
+                // callback
+                db.query(query, (err, response) => {
+                    if (err) {
+                        console.log(err.stack)
+                    } else {
+                        console.log(response.rows[0])
+                        res.sendFile(path.join(__dirname + '/public/transactions.html'));
+                    }
                 })
             })
         });
@@ -128,6 +166,7 @@ express()
         let company = req.body.incomeCompany;
         let date = req.body.incomeDate;
         let amount = req.body.incomeAmount;
+        var total;
 
         const db = new Client({
             connectionString: connectionString,
@@ -135,63 +174,59 @@ express()
         });
         const { id } = req.query;
         db.connect().then(() => {
-            const query = {
-                text: 'INSERT INTO public.transactions(date, company, amount, user_id) VALUES($1, $2, $3, $4)',
-                values: [date, company, amount, 1],
-            }
 
-            // callback
-            db.query(query, (err, response) => {
-                if (err) {
-                    console.log(err.stack)
-                } else {
-                    console.log(response.rows[0])
+            addToTotal(amount, req, function (total) {
+                const query = {
+                    text: 'INSERT INTO public.transactions(date, company, amount, user_id, total) VALUES($1, $2, $3, $4, $5)',
+                    values: [date, company, amount, req.session.id, total],
                 }
-                addToTotal(amount, res, function () {
 
-                    res.sendFile(path.join(__dirname + '/public/transactions.html'));
+                // callback
+                db.query(query, (err, response) => {
+                    if (err) {
+                        console.log(err.stack)
+                    } else {
+                        console.log(response.rows[0])
+                        res.sendFile(path.join(__dirname + '/public/transactions.html'));
+                    }
                 })
             })
         });
     })
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-function subtractFromTotal(amount, res, callback) {
+function subtractFromTotal(amount, req, callback) {
+    var total;
     console.log(amount);
     const db = new Client({
         connectionString: connectionString,
         ssl: true
     });
     db.connect().then(() => {
-        db.query('SELECT * FROM public.total WHERE total_user_id = 1', function (err, result) {
-            let balance = result.rows[0].total;
-            console.log(balance);
-            balance = money.subtract(balance, amount);
-            console.log(balance);
-            db.query('UPDATE public.total SET total = $1 WHERE total_user_id = 1', [balance]);
-            res.sendFile(path.join(__dirname + '/public/transactions.html'));
+        db.query('SELECT * FROM public.transactions WHERE user_id = $1 ORDER BY id DESC', [req.session.id], function (err, result) {
+            total = result.rows[0].total;
+            console.log(total);
+            total = money.subtract(total, amount);
+            console.log(total);
+            callback(total);
         })
     })
-
-    callback(amount);
 }
 
-function addToTotal(amount, res, callback) {
+function addToTotal(amount, req, callback) {
+    var total;
     console.log(amount);
     const db = new Client({
         connectionString: connectionString,
         ssl: true
     });
     db.connect().then(() => {
-        db.query('SELECT * FROM public.total WHERE total_user_id = 1', function (err, result) {
-            let balance = result.rows[0].total;
-            console.log(balance);
-            balance = money.add(balance, amount);
-            console.log(balance);
-            db.query('UPDATE public.total SET total = $1 WHERE total_user_id = 1', [balance]);
-            res.sendFile(path.join(__dirname + '/public/transactions.html'));
+        db.query('SELECT * FROM public.transactions WHERE user_id = $1 ORDER BY id DESC', [req.session.id], function (err, result) {
+            total = result.rows[0].total;
+            console.log(total);
+            total = money.add(total, amount);
+            console.log(total);
+            callback(total);
         })
     })
-
-    callback(amount);
 }

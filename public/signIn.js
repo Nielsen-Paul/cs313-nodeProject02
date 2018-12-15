@@ -1,6 +1,6 @@
 function load() {
 
-    $.get("/signIn", function(data) {
+    $.get("/signUp", function(data) {
         console.log(data);
 
         for (var i = 0; i < data.length; i++) {
